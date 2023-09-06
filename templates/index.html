@@ -1,0 +1,79 @@
+{% extends 'base.html'  %}
+
+{% block work_search %}
+<div class="container">
+
+    <h1>文字搜索图片</h1>
+    <form method="post" action="{% url 'word_search_image' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" class="form-control" name="search_text" placeholder="输入关键字...">
+        </div>
+        <div class="form-group">
+            <label for="model_name">选择模型: </label>
+            <select class="custom-select" id="model_name" name="model_name">
+              <option>CN-CLIP ViT-L/14</option>
+              <option selected>jx3-11-l-001 ViT-L/14</option>
+            </select>
+          </div>
+        <div class="form-group">
+            <label for="result_count">返回结果数: </label>
+            <select class="custom-select" id="result_count" name="result_count">
+              <option>10</option>
+              <option selected>20</option>
+              <option>30</option>
+              <option>40</option>
+              <option>50</option>
+            </select>
+          </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+    </form>
+
+
+
+    {% if image_paths %}
+    <h2>相似的图像</h2>
+    <div><b>当前模型：{{ model_name }}</b></div><br>
+    <div><b>检索关键字：{{ search_label }}</b></div><br>
+    <div class="row">
+        {% for path in image_paths %}
+        <div class="col-md-4">
+            <img src="{{ path }}" class="img-fluid" alt="相似图像" style="height: 400px">
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock work_search %}
+
+
+{% block image_search %}
+<div class="container">
+    <h1>图片搜索</h1>
+    <form method="post" action="{% url 'image_search_image' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="file" name="uploaded_image" class="form-control-file">
+        </div>
+        <button type="submit" class="btn btn-primary">上传并搜索</button>
+    </form>
+
+    <hr>
+</div>
+
+{% endblock image_search %}
+
+{% block setting %}
+<div class="container">
+    <h1>更新图片库</h1>
+    <h2>批量上传（请将所以图片压缩为zip文件上传）</h2>
+    <form method="post" action="{% url 'upload_images' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="file" name="zip_file" class="form-control-file">
+        </div>
+        <button type="submit" class="btn btn-primary">上传</button>
+    </form>
+</div>
+{% endblock setting %}

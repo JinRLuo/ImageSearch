@@ -1,0 +1,5 @@
+static/
+media/
+log/
+clip_cn_vit-b-16.pt
+clip_cn_vit-l-14.pt
