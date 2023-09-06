@@ -37,8 +37,8 @@
     <div><b>检索关键字：{{ search_label }}</b></div><br>
     <div class="row">
         {% for path in image_paths %}
-        <div class="col-md-4">
-            <img src="{{ path }}" class="img-fluid" alt="相似图像" style="height: 400px">
+        <div class="col-md-4" style="padding: 5px">
+            <img src="{{ path }}" class="img-fluid" alt="相似图像" style="max-width: 400px;height: 400px;">
         </div>
         {% endfor %}
     </div>
