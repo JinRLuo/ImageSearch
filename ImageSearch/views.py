@@ -24,16 +24,16 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info("current use device: %s", device)
 
 collections = {
-    'CN-CLIP ViT-L/14': ImageCollection(custom_model=False, dv=device, model_path='', collection_name='image_cn_clip_vit_l_14')
+    'CN-CLIP ViT-L/14': ImageCollection(custom_model=False, dv=device, model_path='', collection_name='image_cn_clip_vit_l_14'),
 #    'jx3-0-0-1-ep1 ViT-L/14': ImageCollection(custom_model=True, dv=device, model_path='l-jx3-0-0-1-ep1.pt', collection_name='image_jx3_0_0_1_ep1_vit_l_14'),
-    #'jx3-11-l-001 ViT-L/14': ImageCollection(custom_model=True, dv=device, model_path='jx3-11-l-001.pt', collection_name='image_jx3_11_l_001_ep1_vit_l_14'),
+    'jx3-11-l-001 ViT-L/14': ImageCollection(custom_model=True, dv=device, model_path='jx3-11-l-001.pt', collection_name='image_jx3_11_l_001_ep1_vit_l_14')
 }
 
 current_select_model = 'jx3-11-l-001 ViT-L/14'
 
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'index.html', {"active_tab":"work_search"})
 
 
 def word_search_image(request):
@@ -45,7 +45,7 @@ def word_search_image(request):
         if imageCollection is None:
             logger.error("not find model")
             return
-        logger.info("search: %s", search_text)
+        logger.info("word search images: %s", search_text)
         images = imageCollection.search_image(search_text, result_count)
         return render(request, 'index.html', {'search_label': search_text, 'image_paths': images, 'model_name': model_name,"active_tab":"work_search"})
 
@@ -54,15 +54,29 @@ def word_search_image(request):
 
 def image_search_image(request):
     if request.method == 'POST':
-        file = request.FILES.get('uploaded_image')
-        img = models.Image(
-            image=file
-        )
-        img.save()
-        return render(request, 'index.html', {'uploaded_image_path': img.image})
+        upload_image = request.FILES.get('uploaded_image')
+        if upload_image is None:
+            logger.error("upload_image is None!")
+            return render(request, 'index.html', {"active_tab":"image_search"})
+        result_count = int(request.POST.get('result_count', 20))
+        model_name = request.POST.get('model_name', 'jx3-11-l-001 ViT-L/14')
+        image_path = os.path.join(settings.MEDIA_ROOT, upload_image.name)
+        default_storage.save(image_path, upload_image)
+        imageCollection = collections[model_name]
+        if imageCollection is None:
+            logger.error("not find model")
+            return render(request, 'index.html', {"active_tab":"image_search"})
+        logger.info("image search images: %s", image_path)
 
-    return render(request, 'index.html', {})
+        with Image.open(image_path) as img:
+            buffered = BytesIO()
+            img.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
 
+        images = imageCollection.image_search_images(image_path, result_count)
+        return render(request, 'index.html', {'uploaded_image_base64_image_search': img_str, 'res_image_paths': images, 'model_name': model_name, 'active_tab': 'image_search'})
+
+    return render(request, 'index.html', {"active_tab":"image_search"})
 
 def image_zt_tag(request):
     if request.method == 'POST':
@@ -75,16 +89,16 @@ def image_zt_tag(request):
         if imageCollection is None:
             logger.error("not find model")
             return
-        labs = labs_text.split(',') 
+        labs = labs_text.split(',')
         restext = imageCollection.classF( file_path,labs)
 
         with Image.open(file_path) as img:
             buffered = BytesIO()
             img.save(buffered, format="PNG")
             img_str = base64.b64encode(buffered.getvalue()).decode()
-        
+
         return render(request, 'index.html', {'restext': restext,"active_tab":"image_zt_tag",'labs_text': labs_text,'uploaded_image_base64': img_str})
-    
+
     return render(request, 'index.html', {"active_tab":"image_zt_tag"})
 
 

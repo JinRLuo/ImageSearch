@@ -11,7 +11,7 @@ from ImageSearch.milvue_utils import create_milvus_collection, rebuild_milvus_co
 
 class ImageCollection:
     DIM = 768
-
+    search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
     def __init__(self, custom_model, model_path, dv, collection_name):
         self.collection_name = collection_name
         if custom_model:
@@ -76,7 +76,19 @@ class ImageCollection:
             vct = text_features.numpy().tolist()[0]
         else:
             vct = text_features.cpu().numpy().tolist()[0]
-        search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
         self.collection.load()
-        results = self.collection.search([vct], 'image_vector', search_params, topn, output_fields=['path'])
+        results = self.collection.search([vct], 'image_vector', ImageCollection.search_params, topn, output_fields=['path'])
+        return results[0].ids
+
+    def image_search_images(self, source_image_path, topn=5):
+        with torch.no_grad():
+            img = self.preprocess(Image.open(source_image_path)).unsqueeze(0).to(self.device)
+            image_feature = self.model.encode_image(img)
+            image_feature /= image_feature.norm(dim=-1, keepdim=True)
+            if self.device == 'cpu':
+                vct = image_feature.numpy().tolist()[0]
+            else:
+                vct = image_feature.cpu().numpy().tolist()[0]
+        self.collection.load()
+        results = self.collection.search([vct], 'image_vector', ImageCollection.search_params, topn, output_fields=['path'])
         return results[0].ids

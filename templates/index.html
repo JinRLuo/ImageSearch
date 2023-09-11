@@ -7,18 +7,18 @@
     <form method="post" action="{% url 'word_search_image' %}">
         {% csrf_token %}
         <div class="form-group">
-            <input type="text" class="form-control" name="search_text" placeholder="输入关键字..." value="{{ search_label }}">
+            <input type="text" class="form-control" name="search_text" placeholder="输入关键字..." value="{{ search_label }}" required>
         </div>
         <div class="form-group">
             <label for="model_name">选择模型: </label>
-            <select class="custom-select" id="model_name" name="model_name">
+            <select class="custom-select" id="model_name" name="model_name" required>
               <option>CN-CLIP ViT-L/14</option>
               <option selected>jx3-11-l-001 ViT-L/14</option>
             </select>
           </div>
         <div class="form-group">
             <label for="result_count">返回结果数: </label>
-            <select class="custom-select" id="result_count" name="result_count">
+            <select class="custom-select" id="result_count" name="result_count" required>
               <option>10</option>
               <option selected>20</option>
               <option>30</option>
@@ -54,7 +54,7 @@
     <form method="post" action="{% url 'image_zt_tag' %}" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
-            <input type="file" name="uploaded_image" class="form-control-file">
+            <input type="file" name="uploaded_image" class="form-control-file" required>
         </div>
 
         {% if uploaded_image_base64 %}
@@ -67,14 +67,14 @@
 
         <div class="form-group">
             <label for="model_name">选择模型: </label>
-            <select class="custom-select" id="model_name" name="model_name">
+            <select class="custom-select" id="model_name" name="model_name" required>
               <option selected>CN-CLIP ViT-L/14</option>
               <option >jx3-11-l-001 ViT-L/14</option>
             </select>
-          </div>
+        </div>
 
         <div class="form-group">
-            <input type="text" class="form-control" name="labs_text" placeholder="输入分类" value="{{ labs_text }}">
+            <input type="text" class="form-control" name="labs_text" placeholder="输入分类" value="{{ labs_text }}" required>
         </div>
 
         <button type="submit" class="btn btn-primary">上传并打标</button>
@@ -94,9 +94,46 @@
     <form method="post" action="{% url 'image_search_image' %}" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
-            <input type="file" name="uploaded_image" class="form-control-file">
+            <input type="file" name="uploaded_image" class="form-control-file" required>
         </div>
+        <div class="form-group">
+            <label for="model_name">选择模型: </label>
+            <select class="custom-select" id="model_name" name="model_name" required>
+              <option>CN-CLIP ViT-L/14</option>
+              <option>jx3-11-l-001 ViT-L/14</option>
+            </select>
+          </div>
+        <div class="form-group">
+            <label for="result_count">返回结果数: </label>
+            <select class="custom-select" id="result_count" name="result_count" required>
+              <option>10</option>
+              <option selected>20</option>
+              <option>30</option>
+              <option>40</option>
+              <option>50</option>
+            </select>
+          </div>
         <button type="submit" class="btn btn-primary">上传并搜索</button>
+
+        {% if uploaded_image_base64_image_search %}
+            <div class="form-group">
+                <img src="data:image/png;base64,{{ uploaded_image_base64_image_search }}" alt="Uploaded Image" class="img-fluid" style="max-width: 300px;" >
+            </div>
+        {% endif %}
+
+        {% if res_image_paths %}
+        <h2>相似的图像</h2>
+        <div><b>当前模型：{{ model_name }}</b></div><br>
+        <!-- <div><b>检索关键字：{{ search_label }}</b></div><br> -->
+        <div class="row">
+            {% for path in res_image_paths %}
+            <div class="col-md-4" style="padding: 5px">
+                <img src="{{ path }}" class="img-fluid" alt="相似图像" style="max-width: 400px;height: 400px;">
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
     </form>
 
     <hr>
@@ -114,7 +151,7 @@
     <form method="post" action="{% url 'upload_images' %}" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
-            <input type="file" name="zip_file" class="form-control-file">
+            <input type="file" name="zip_file" class="form-control-file" required>
         </div>
         <button type="submit" class="btn btn-primary">上传</button>
     </form>

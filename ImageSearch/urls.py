@@ -18,7 +18,7 @@ from django.urls import path
 from . import views, settings
 
 urlpatterns = [
-    path('index/', views.index, name='index'),
+    path('', views.index, name='index'),
     path('word_search_image', views.word_search_image, name='word_search_image'),
     path('image_search_image', views.image_search_image, name='image_search_image'),
     path('image_zt_tag', views.image_zt_tag, name='image_zt_tag'),
