@@ -8,7 +8,7 @@ pip install ./Chinese-CLIP
 
 ### 启动django服务
 ```
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8080
 ```
 ### 目录结构
 图片库上传后会保存在media目录下

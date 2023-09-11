@@ -8,8 +8,14 @@ from django.shortcuts import render
 from Image import models
 from ImageSearch import settings
 import torch
+import traceback
 
 from ImageSearch.ImageCollection import ImageCollection
+from django.core.files.storage import default_storage
+import base64
+from PIL import Image
+from io import BytesIO
+
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +24,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 logging.info("current use device: %s", device)
 
 collections = {
-    'CN-CLIP ViT-L/14': ImageCollection(custom_model=False, dv=device, model_path='', collection_name='image_cn_clip_vit_l_14'),
+    'CN-CLIP ViT-L/14': ImageCollection(custom_model=False, dv=device, model_path='', collection_name='image_cn_clip_vit_l_14')
 #    'jx3-0-0-1-ep1 ViT-L/14': ImageCollection(custom_model=True, dv=device, model_path='l-jx3-0-0-1-ep1.pt', collection_name='image_jx3_0_0_1_ep1_vit_l_14'),
-    'jx3-11-l-001 ViT-L/14': ImageCollection(custom_model=True, dv=device, model_path='jx3-11-l-001.pt', collection_name='image_jx3_11_l_001_ep1_vit_l_14'),
+    #'jx3-11-l-001 ViT-L/14': ImageCollection(custom_model=True, dv=device, model_path='jx3-11-l-001.pt', collection_name='image_jx3_11_l_001_ep1_vit_l_14'),
 }
 
 current_select_model = 'jx3-11-l-001 ViT-L/14'
@@ -41,9 +47,9 @@ def word_search_image(request):
             return
         logger.info("search: %s", search_text)
         images = imageCollection.search_image(search_text, result_count)
-        return render(request, 'index.html', {'search_label': search_text, 'image_paths': images, 'model_name': model_name})
+        return render(request, 'index.html', {'search_label': search_text, 'image_paths': images, 'model_name': model_name,"active_tab":"work_search"})
 
-    return render(request, 'index.html', {})
+    return render(request, 'index.html', {"active_tab":"work_search"})
 
 
 def image_search_image(request):
@@ -56,6 +62,30 @@ def image_search_image(request):
         return render(request, 'index.html', {'uploaded_image_path': img.image})
 
     return render(request, 'index.html', {})
+
+
+def image_zt_tag(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('uploaded_image')
+        file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.name)
+        default_storage.save(file_path, uploaded_file)
+        labs_text = request.POST.get('labs_text', '')
+        model_name = request.POST.get('model_name', 'jx3-11-l-001 ViT-L/14')
+        imageCollection = collections[model_name]
+        if imageCollection is None:
+            logger.error("not find model")
+            return
+        labs = labs_text.split(',') 
+        restext = imageCollection.classF( file_path,labs)
+
+        with Image.open(file_path) as img:
+            buffered = BytesIO()
+            img.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+        
+        return render(request, 'index.html', {'restext': restext,"active_tab":"image_zt_tag",'labs_text': labs_text,'uploaded_image_base64': img_str})
+    
+    return render(request, 'index.html', {"active_tab":"image_zt_tag"})
 
 
 # 上传所有图片 通过zip文件压缩
@@ -89,8 +119,8 @@ def handle_uploaded_zip(zip_file):
                     for collection in collections.values():
                         collection.insert_image(image_path)
                     cnt = cnt + 1
-                except BaseException:
-                    logger.error("import image %s fail!", image_path)
+                except BaseException as e:
+                    logger.error("import image %s fail! Error: %s", image_path, traceback.format_exc())
                     continue
                 logger.info("import image %s...  success count[%d]", image_path, cnt)
 

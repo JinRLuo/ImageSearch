@@ -42,6 +42,30 @@ class ImageCollection:
             self.collection.insert(data)
         return
 
+    def classF(self, image_path,labels):
+        text = clip.tokenize(labels).to(self.device)
+        img = self.preprocess(Image.open(image_path)).unsqueeze(0).to(self.device)
+        restext = ""
+        with torch.no_grad():
+            image_feature = self.model.encode_image(img)
+            image_feature /= image_feature.norm(dim=-1, keepdim=True)
+            text_features = self.model.encode_text(text)
+            text_features /= text_features.norm(dim=-1, keepdim=True)
+
+            logits_per_image, logits_per_text =  self.model.get_similarity(img, text)
+            probs = logits_per_image.softmax(dim=-1).cpu().numpy()
+        
+        label_probs = [(label, prob) for label, prob in zip(labels, probs[0])]
+        label_probs.sort(key=lambda x: x[1], reverse=True)   
+            
+        for label, prob in label_probs:
+            prob_percent = prob * 100
+            restext = restext+f"{label}: {prob_percent:.2f}% /n"
+            
+        return restext
+    
+
+
     def search_image(self, text, topn=5):
         labels = [text]
         text = clip.tokenize(labels).to(self.device)

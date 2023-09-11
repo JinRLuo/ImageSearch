@@ -1,0 +1,6 @@
+{
+    "python.analysis.typeCheckingMode": "off",
+    "files.exclude": {
+        "Chinese-CLIP/": true
+    }
+}

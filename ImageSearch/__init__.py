@@ -5,6 +5,7 @@ from pymilvus import connections
 
 
 # Connect to Milvus service
-connections.connect(host="10.11.89.130", port="19530")
+
+connections.connect(host="db", port="19530")
 
 

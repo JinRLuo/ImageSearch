@@ -3,6 +3,7 @@
 
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
+<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>
 {% bootstrap_javascript jquery='full' %}
 
 {# Display django.contrib.messages as Bootstrap alerts #}
@@ -17,21 +18,26 @@
     <div>
         <nav>
           <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button class="nav-link active" id="nav-home-tab" data-toggle="tab" data-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">文搜图</button>
-            <button class="nav-link" id="nav-profile-tab" data-toggle="tab" data-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">图搜图</button>
-            <button class="nav-link" id="nav-contact-tab" data-toggle="tab" data-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">配置</button>
+            <button class="nav-link {% if active_tab == "work_search" %}active{% endif %}" id="nav-home-tab" data-toggle="tab" data-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">文搜图</button>
+            <button class="nav-link {% if active_tab == "image_zt_tag" %} active{% endif %}" id="nav-zs-tag-tab" data-toggle="tab" data-target="#nav-zs-tag" type="button" role="tab" aria-controls="nav-zs-tag" aria-selected="false">ZeroShot标签</button>
+            <button class="nav-link {% if active_tab == "image_search" %} active{% endif %}" id="nav-profile-tab" data-toggle="tab" data-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">图搜图</button>
+            <button class="nav-link {% if active_tab == "setting" %} active{% endif %}" id="nav-contact-tab" data-toggle="tab" data-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">配置</button>
           </div>
         </nav>
         <div class="tab-content" id="nav-tabContent">
-          <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+          <div class="tab-pane fade {% if active_tab == "work_search" %}show active{% endif %}" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
             {% block work_search %}
             {% endblock %}
           </div>
-          <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+          <div class="tab-pane fade {% if active_tab == "image_zt_tag" %}show active{% endif %}" id="nav-zs-tag" role="tabpanel" aria-labelledby="nav-zs-tag-tab">
+            {% block image_zt_tag %}
+            {% endblock %}
+        </div>
+          <div class="tab-pane fade {% if active_tab == "image_search" %}show active{% endif %}" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
               {% block image_search %}
               {% endblock %}
           </div>
-          <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+          <div class="tab-pane fade {% if active_tab == "setting" %}show active{% endif %}" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
               {% block setting %}
               {% endblock %}
           </div>

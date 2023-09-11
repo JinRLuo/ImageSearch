@@ -1,0 +1,3 @@
+django
+pymilvus
+django-bootstrap4

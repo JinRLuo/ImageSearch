@@ -7,7 +7,7 @@
     <form method="post" action="{% url 'word_search_image' %}">
         {% csrf_token %}
         <div class="form-group">
-            <input type="text" class="form-control" name="search_text" placeholder="输入关键字...">
+            <input type="text" class="form-control" name="search_text" placeholder="输入关键字..." value="{{ search_label }}">
         </div>
         <div class="form-group">
             <label for="model_name">选择模型: </label>
@@ -34,7 +34,7 @@
     {% if image_paths %}
     <h2>相似的图像</h2>
     <div><b>当前模型：{{ model_name }}</b></div><br>
-    <div><b>检索关键字：{{ search_label }}</b></div><br>
+    <!-- <div><b>检索关键字：{{ search_label }}</b></div><br> -->
     <div class="row">
         {% for path in image_paths %}
         <div class="col-md-4" style="padding: 5px">
@@ -46,6 +46,46 @@
 </div>
 
 {% endblock work_search %}
+
+
+{% block image_zt_tag %}
+<div class="container">
+    <h1>zero shot 标签</h1>
+    <form method="post" action="{% url 'image_zt_tag' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="file" name="uploaded_image" class="form-control-file">
+        </div>
+
+        {% if uploaded_image_base64 %}
+            <div class="form-group">
+                <img src="data:image/png;base64,{{ uploaded_image_base64 }}" alt="Uploaded Image" class="img-fluid" style="max-width: 300px;" >
+            </div>
+        {% endif %}
+
+
+
+        <div class="form-group">
+            <label for="model_name">选择模型: </label>
+            <select class="custom-select" id="model_name" name="model_name">
+              <option selected>CN-CLIP ViT-L/14</option>
+              <option >jx3-11-l-001 ViT-L/14</option>
+            </select>
+          </div>
+
+        <div class="form-group">
+            <input type="text" class="form-control" name="labs_text" placeholder="输入分类" value="{{ labs_text }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">上传并打标</button>
+    </form>
+
+    <hr>
+    <div class="form-group">
+        {{ restext }}
+    </div>
+</div>
+{% endblock image_zt_tag %}
 
 
 {% block image_search %}
@@ -63,6 +103,9 @@
 </div>
 
 {% endblock image_search %}
+
+
+
 
 {% block setting %}
 <div class="container">
